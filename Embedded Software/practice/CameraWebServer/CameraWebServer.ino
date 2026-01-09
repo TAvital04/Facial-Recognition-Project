@@ -9,8 +9,8 @@
 // ===========================
 // Enter your WiFi credentials
 // ===========================
-const char *ssid = "Avital Wi-Fi";
-const char *password = "asdfghjk";
+const char *ssid = "";
+const char *password = "";
 
 void startCameraServer();
 void setupLedFlash();
