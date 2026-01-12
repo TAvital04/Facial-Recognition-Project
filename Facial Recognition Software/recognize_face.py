@@ -10,7 +10,7 @@ import numpy as np
 import json
 
 print('Starting Lambda')
-BUCKET_NAME = 'talav-facial-recognition-project'
+BUCKET_NAME = '******'                                                  # Fake name
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
@@ -22,7 +22,7 @@ def lambda_handler(event, context):
         # Authorize the request
         print('Authorizing request')
         token = headers.get('device-token')
-        if not token or token != 'SPAGHETTI':
+        if not token or token != '*****':                               # Fake token
             raise Exception('Unauthorized request')
 
         # Gather the authorized faces in the S3 bucket

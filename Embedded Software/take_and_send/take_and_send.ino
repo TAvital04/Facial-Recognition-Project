@@ -75,12 +75,12 @@
   #include <WiFiClientSecure.h>
   #include <HTTPClient.h>
 
-  static const char *WIFI_SSID = "Avital Wi-Fi";
-  static const char *WIFI_PASS = "asdfghjk";
+  static const char *WIFI_SSID = "*****";
+  static const char *WIFI_PASS = "*****";
 
   static const char *LAMBDA_URL = "https://z7tejhg75732zty5kv7fnodile0mgdjh.lambda-url.us-east-2.on.aws/";
 
-  static const char *DEVICE_TOKEN = "SPAGHETTI";
+  static const char *DEVICE_TOKEN = "*****";                                                 // Fake token
 
   static const char *LAMBDA_OPERATION_UPLOAD = "upload";
   static const char *LAMBDA_OPERATION_VALIDATE = "validate";
