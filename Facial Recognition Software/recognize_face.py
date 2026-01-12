@@ -1,94 +1,120 @@
+#Import libraries
 print('Importing libraries')
 import face_recognition
 import boto3
-import os
+import base64
+from PIL import Image
+import io
+import time
+import numpy as np
+import json
 
-print('Starting lambda')
+print('Starting Lambda')
+BUCKET_NAME = 'talav-facial-recognition-project'
+s3 = boto3.client('s3')
 
-def terminate_folder():
-    print('Terminating project folder')
-
-    if os.access('./Images/Known', os.F_OK):
-        for dir in os.listdir('Images/Known'):
-            os.remove(f'./Images/Known/{dir}')
-        os.rmdir('Images/Known')
-
-    if os.access('./Images/Unknown', os.F_OK):
-        for dir in os.listdir('Images/Unknown'):
-            os.remove(f'./Images/Unknown/{dir}')
-        os.rmdir('Images/Unknown')
-
-    os.rmdir('Images')
-
-def lambda_handler():
+def lambda_handler(event, context):
     try:
-        print('Starting lambda handler')
+        # Start the Lambda handler
+        print('Starting Lambda handler')
+        headers = event.get('headers')
 
-        print('Setting up project folder')
-        if os.access('./Images', os.F_OK):
-            terminate_folder()
+        # Authorize the request
+        print('Authorizing request')
+        token = headers.get('device-token')
+        if not token or token != 'SPAGHETTI':
+            raise Exception('Unauthorized request')
 
-        os.mkdir('Images')
-        os.mkdir('Images/Known')
-        os.mkdir('Images/Unknown')
-
+        # Gather the authorized faces in the S3 bucket
         print('Gathering known images')
-        s3_client = boto3.client('s3')
-        s3_resource = boto3.resource('s3')
+        known_encodings = []
+        keys = []
 
-        bucket_name = 'talav-facial-recognition-project'
-        bucket = s3_resource.Bucket(bucket_name)
+        paginator = s3.get_paginator('list_objects_v2')
+        for page in paginator.paginate(
+            Bucket = BUCKET_NAME,
+            Prefix = 'known_images/'
+        ):
+            for obj in page.get('Contents', []):
+                key = obj.get('Key')
+                if not key.endswith('.json'):
+                    continue
 
-        known_images = []
-        for object in bucket.objects.filter(Prefix='known_images/'):
-            filename = object.key.removeprefix('known_images/')
+                keys.append(key)
 
-            if len(filename) == 0:
-                continue
+                obj_body = s3.get_object(
+                    Bucket = BUCKET_NAME,
+                    Key=key
+                ).get('Body')
 
-            path = f'./Images/Known/{filename}'
-            open(path, 'a')
+                obj_body_bytes = obj_body.read()
+                data = json.loads(obj_body_bytes.decode('utf-8'))
 
-            s3_client.download_file(Bucket = bucket_name, Key = object.key, Filename = path)
-            known_images.append(face_recognition.load_image_file(path))
+                encoding = np.array(data.get('encoding'), dtype = np.float64)
+                known_encodings.append(encoding)
 
-        print('Processing known images')
-        known_images_encoded = []
-        for image in known_images:
-            encoded_image = face_recognition.face_encodings(image)
-            known_images_encoded.append(encoded_image)
-
+        # Gather the image sent by the request
         print('Gathering given image')
-        unknown_image = face_recognition.load_image_file('./WIN_20251227_21_37_51_Pro.jpg')
+        body = event.get('body')
+        if event.get('isBase64Encoded'):
+            image_bytes = base64.b64decode(body)
+            given_image = np.array(Image.open(io.BytesIO(image_bytes)).convert('RGB'))
+        else:
+            raise Exception('Invalid request')
 
+        # Process the image sent by the request
         print('Processing given image')
-        unknown_image_encoded = face_recognition.face_encodings(unknown_image)[0]
+        given_image_encodings = face_recognition.face_encodings(given_image)
 
+        if len(given_image_encodings) == 0:
+            raise Exception('No face found in the given image')
+
+        given_image_encoding = given_image_encodings[0]
+
+        # Compare the image sent by the request to the images in the S3 bucket
         print('Comparing images')
-        result = False
-        for image in known_images_encoded:
-            comparison = face_recognition.compare_faces(image, unknown_image_encoded, .6)
+        matches = face_recognition.compare_faces(known_encodings, given_image_encoding, tolerance = 0.6)
+        
+        # Perform the given operation
+        print('Performing given operation')
+        operation = headers.get('operation')
 
-            if comparison[0]:
-                result = True
-                continue
+        if not operation:
+            raise Exception('No operation given')
 
-        print(f'Result: {result}')
+        if operation == 'upload' or operation == 'delete':
+            # Delete all matching images
+            for i in range(len(matches)):
+                if matches[i]:
+                    s3.delete_object(
+                        Bucket = BUCKET_NAME,
+                        Key = keys[i]
+                    )
 
-        terminate_folder()
+            if operation == 'upload':
+                # Save the image sent by the request
+                key = f'known_images/{int(time.time())}.json'
+                s3.put_object(
+                    Bucket=BUCKET_NAME,
+                    Key=key,
+                    Body=json.dumps({'encoding': given_image_encoding.tolist()}).encode('utf-8'),
+                    ContentType='application/json',
+                )
 
-        # print('Returning results')
-        # return {
-        #     'statusCode': 200,
-        #     'body': json.dumps('Hello from Lambda!')
-        # }
+        elif operation == 'validate':
+            # Check if there is a match
+            if not any(matches):
+                raise Exception('No match found')
+
+        return {
+            'statusCode': 200,
+            'headers': {'content-type': 'application/json'},
+            'body': json.dumps({'message': 'Operation successful'}),
+        }
 
     except Exception as e:
-        print(f'Error: {e}')
-        terminate_folder()
-        # return {
-        #     'statusCode': 400,
-        #     'body': json.dumps(e)
-        # }
-
-lambda_handler()
+        return {
+            'statusCode': 500,
+            'headers': {'content-type': 'application/json'},
+            'body': json.dumps({'error': str(e)}),
+        }
