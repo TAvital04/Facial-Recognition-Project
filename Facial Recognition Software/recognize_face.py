@@ -10,7 +10,15 @@ import numpy as np
 import json
 
 print('Starting Lambda')
-BUCKET_NAME = '******'                                                  # Fake name
+
+                                         # CHANGE THIS
+#-----------------------------------------------------
+
+BUCKET_NAME = '******'
+TOKEN = '*****'
+
+#-----------------------------------------------------
+
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
@@ -22,7 +30,7 @@ def lambda_handler(event, context):
         # Authorize the request
         print('Authorizing request')
         token = headers.get('device-token')
-        if not token or token != '*****':                               # Fake token
+        if not token or token != TOKEN:
             raise Exception('Unauthorized request')
 
         # Gather the authorized faces in the S3 bucket
