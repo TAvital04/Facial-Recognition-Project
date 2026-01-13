@@ -38,6 +38,9 @@ There are also buttons that connect to GPIO pins. These should be wired between 
 >
 > **Do not use this document as a complete tutorial for this operation. Consult your device and other sources. Make informed decisions when working with electrical circuits!**
 
+![A picture of the hardware on a breadboard](https://github.com/TAvital04/Facial-Recognition-Project/blob/main/Photos/Hardware.png)
+![A diagram of the hardware on a breadboard](https://github.com/TAvital04/Facial-Recognition-Project/blob/main/Photos/Hardware%20Diagram.png)
+
 ## 2. Firmware 
 This section will cover the firmware for the Facial Recognition Project.
 
