@@ -1,22 +1,22 @@
 # Facial Recognition Project
-The following documents described the structure and code of the Facial Recognition Project.
+The following documents describes the structure and code of the Facial Recognition Project.
 
 ## Contents 
 1. Introduction
 2. Hardware
 3. Firmware
+   
+    3.1. Environment
   
-     3.1. Environment
-
-     3.2. Code
-
+    3.2. Code
+  
 4. Software
 
-  4.1. Environment 
-  
-  4.2. Code
+   4.1. Environment 
 
-5. Pipeline of Information
+   4.2. Code
+6. Pipeline of Information
+7. Replicate the Project
   
 ## 1. Introduction 
 This project serves as a device that can recognize a person's face and send a response. It contains hardware, firmware, and software implementations. This docment will demonstrate each element- how they work, and how they work with the others. 
@@ -94,12 +94,16 @@ This section demonstrates how information flows throughout this project.
 
 The program starts with the device in its setup phase. During this phase, it connects to the WiFi and the camera. 
 
-Once this phase is complete, the device starts to listen the the press of one of three buttons, each corresponding to an operation. These operations are "upload", "validate", and "delete". When a button is pressed, the microcontroller captures an image with the camera it is assigned to and sends an API call.
+Once this phase is complete, the device starts to listen for the press of one of three buttons, each corresponding to an operation. These operations are "upload", "validate", and "delete". When a button is pressed, the microcontroller captures an image with the camera and sends an API call.
 
-The API call is a POST request to a Lambda function URL. It has a header signifying that an image is being sent, a header that contains a token the Lambda function checks as a layer of security, and a hearder that dictates the operation corresponding to the button that was pressed. In the request body is the raw JPEG binary version of the captured image.
+The API call is a POST request to a Lambda function URL. It has a header signifying that an image is being sent, a header that contains a token the Lambda function validates as a layer of security, and a header that dictates the operation corresponding to the button that was pressed. In the request body is the raw JPEG binary version of the captured image.
 
 When the Lambda function receives the request, it starts by validating the token. 
 
-Next, it gathers all the images uploaded previously from the S3 bucket they were stored in and places them in an array.
+Next, it gathers all the images previously uploaded into the S3 bucket dedicated for the project and places them in an array.
 
-After that, it converts the raw JPEG binary image into base64 format 
+After that, it converts the raw JPEG binary image send by the request into a format that the face_recognition library can interpret, and subsequently uses the library to encode it.
+
+The final step that all 3 operations perform is using the array of encodings for all stored images and the encoding of the new image as parameters for the function face_recognition.compare_faces(), which returns a binary array where each index is a boolean value that represents whether the encoding in that index of the array of encodings from the S3 bucket is a match for the new face encoding.
+
+The "upload" and "delete" operations delete all encodings that are a match for the new one, but the "upload" operation also adds the new encoding to the S3 bucket. They both return a success if the operation was performed without error, regardless of whether or not a match was found. The "validate" operation returns a success when there is at least one encoding that is a match for the new one, otherwise, it returns an error.
