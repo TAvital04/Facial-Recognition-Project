@@ -1,5 +1,5 @@
 # Facial Recognition Project
-This document describes the different components of the Facial Recognition Project and how they work. It isn’t a tutorial on how to replicate the project.
+This document describes the different components of the Facial Recognition Project and how they work. It isn’t a tutorial on how to replicate it.
 
 ## Contents 
 1. Hardware
