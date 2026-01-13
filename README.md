@@ -19,7 +19,7 @@ This document describes the different components of the Facial Recognition Proje
 ## 1. Hardware 
 Facial Recognition Project uses an FTDI YP-05 Serial Adapter and an ESP32-CAM microcontroller. A serial adapter is required to upload code to the ESP32-CAM. In this project, it is also used to power the microcontroller.
 
-The serial adapter connects to a PC via Mini-USB, but connecting to the ESP32-CAM is a bit more complicated.
+The serial adapter connects to a PC via Mini-USB, but connecting to the ESP32-CAM is a bit more complicated. The following table shows what pins to connect and why.
 
 | Adapter | Microcontroller | Purpose |
 |-|-|------------------------------|
