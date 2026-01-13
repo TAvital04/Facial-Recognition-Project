@@ -42,7 +42,7 @@ There are also buttons that connect to GPIO pins. These should be wired between 
 This section will cover the firmware for the Facial Recognition Project.
 
 ### 2.1. Environment 
-The firmware of this project is written, compiled, and uploaded to the microcontroller through the Arduino IDE. The firmware is written in C++ and is completely encapsulated within ```\Facial-Recognition-Project\Embedded Software\take_and_send\take_and_send.ino```.
+The firmware of this project is written, compiled, and uploaded to the microcontroller through the Arduino IDE. The firmware is written in C++ and is completely encapsulated within ```\Firmware\take_and_send.ino```.
 
 ### 2.2. Code
 The firmware code contains 3 distinct components for designing the hardware interface, establishing a connection to the ESP32-CAM, and sending an HTTP request.
@@ -62,13 +62,13 @@ The program needs an internet connection to perform the API call. This is establ
 The software for this project involves AI, which is computationally heavy. Therefore, it cannot be performed in the microcontroller and must be performed elsewhere. In this case, an AWS Lambda Function is called.
 
 ### 3.1. Environment 
-All the software in this project is in the Lambda Function, and the code in the Lambda Function can be found in ```\Facial Recognition Software\recognize_face.py```. The images to be uploaded and recognized are stored in AWS S3 buckets.
+All the software in this project is in the Lambda Function, and the code in the Lambda Function can be found in ```\Software\recognize_face.py```. The images to be uploaded and recognized are stored in AWS S3 buckets.
 
 This program is called via the Lambda URL, not an API Gateway, since the Lambda URL can accept more data and support longer timeouts. The API call requires a token that matches the one in the function and an operation, whether it is “upload”, “validate”, or “delete”. These are sent as headers called “device-token” and “operation” respectively. In the body, it requires the raw JPEG image bytes. If any of these requirements are missed or are fulfilled insufficiently, the function will throw the corresponding error.
 
 The security of the API call is currently very weak. The Lambda function URL must be set to public, and the token is the only layer of security. This is necessary for the firmware request to work as written. The next step in security would be to validate a request with AWS IAM authentication.
 
-The Lambda Function requires the face_recognition library, which requires CMake and dlib. These dependencies must be uploaded manually and must be compatible with the AWS Linux-based shell. The binaries for the dependencies were compiled using the AWS Lambda Docker Container and are available in the proper file structure in ```\Facial Recognition Software\dependencies.zip```. They are implemented as an AWS Layer.
+The Lambda Function requires the face_recognition library, which requires CMake and dlib. These dependencies must be uploaded manually and must be compatible with the AWS Linux-based shell. The binaries for the dependencies were compiled using the AWS Lambda Docker Container. They currently cannot be uploaded to this repository because the zip folder is too large. There are no plans for uploading these dependencies at the moment. The dependencies are implemented as an AWS Layer.
 
 ### 3.2. Code
 The Lambda Function is given one of three operations: “upload”, “validate”, or “delete”.
