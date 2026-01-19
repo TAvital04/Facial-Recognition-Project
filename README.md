@@ -1,6 +1,8 @@
 # Facial Recognition Project
 This document describes the different components of the Facial Recognition Project and how they work. It isn’t a tutorial on how to replicate it.
 
+This project involves combining many hardware, firmware, and software components into one product. It has a program in an ESP32-CAM microcontroller that captures an image at the press of one of three buttons and sends an HTTP request to perform CRUD operations based on the button pressed. The HTTP requests includes the raw JPEG binary of the image captured by the microcontroller and the given CRUD operation; it is directed the an AWS Lambda function. The Lambda function recognizes a face in the image captured and performs the CRUD operation given in the request, returning a positive or negative response depending on operation and validation.
+
 ## Contents 
 1. Hardware
 2. Firmware
