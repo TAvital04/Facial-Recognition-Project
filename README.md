@@ -47,7 +47,7 @@ There are also buttons that connect to GPIO pins. These should be wired between 
 This section will cover the firmware for the Facial Recognition Project.
 
 ### 2.1. Environment 
-The firmware of this project is written, compiled, and uploaded to the microcontroller through the Arduino IDE. The firmware is written in C++ and is completely encapsulated within ```\Firmware\take_and_send.ino```.
+The firmware of this project is written, compiled, and uploaded to the microcontroller through the Arduino IDE. The firmware is written in C++ and is completely encapsulated within ```\Firmware\take_and_send.ino```. On the IDE, you must set the baud rate to 115200Bd, as that is what the device expects.
 
 ### 2.2. Code
 The firmware code contains 3 distinct components for designing the hardware interface, establishing a connection to the ESP32-CAM, and sending an HTTP request.
