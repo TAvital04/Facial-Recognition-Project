@@ -5,7 +5,7 @@
   #define BUTTON_VALIDATE  14
   #define BUTTON_DELETE     2
 
-// Camera
+// Camera: https://github.com/RuiSantosdotme/arduino-esp32-CameraWebServer/blob/master/CameraWebServer/CameraWebServer.ino
   #include "esp_camera.h"
 
   // Pins that perform power/reset operations
