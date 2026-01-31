@@ -86,7 +86,7 @@
     static const char *DEVICE_TOKEN = "*****";
 
   **********************************************************/
-=
+
 
   static const char *LAMBDA_OPERATION_UPLOAD = "upload";
   static const char *LAMBDA_OPERATION_VALIDATE = "validate";
